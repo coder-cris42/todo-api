@@ -1,0 +1,27 @@
+replicaCount: 2
+
+image:
+  repository: todo-api
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+
+resources:
+  limits:
+    cpu: "2"
+    memory: "256Mi"
+  requests:
+    cpu: "2"
+    memory: "256Mi"
+
+env:
+  DB_USERNAME: "root"
+  DB_PASSWORD: "sandbox-root-password"
+  DB_HOST: "127.0.0.1"
+  DB_PORT: "3306"
+  DB_NAME: "todo-database"
+  SERVER_PORT: "8080"
+  DB_TLS_SKIP_VERIFY: "true"

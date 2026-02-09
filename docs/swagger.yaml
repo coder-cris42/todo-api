@@ -1,0 +1,1016 @@
+openapi: 3.0.0
+info:
+  title: TODO API
+  description: A comprehensive REST API for managing tasks, workflows, and task management
+  version: 1.0.0
+  contact:
+    name: API Support
+  license:
+    name: MIT
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Development server
+  - url: http://prod-api.example.com/api/v1
+    description: Production server
+
+tags:
+  - name: Health
+    description: Application health check endpoints
+  - name: Tasks
+    description: Task management operations
+  - name: Task Status
+    description: Task status management operations
+  - name: Task Type
+    description: Task type management operations
+  - name: Workflows
+    description: Workflow management operations
+
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health check
+      description: Check the health status of the API and database connection
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Application is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: OK
+        '200-error':
+          description: Application error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: ERROR_DATABASE_CONNECTION
+
+  /todo:
+    post:
+      tags:
+        - Tasks
+      summary: Create a new task
+      description: Create a new task with title, description, author, and deadline
+      operationId: createTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskRequest'
+      responses:
+        '201':
+          description: Task created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    get:
+      tags:
+        - Tasks
+      summary: Get all tasks
+      description: Retrieve a list of all tasks
+      operationId: getAllTasks
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of tasks to return
+          schema:
+            type: integer
+            default: 10
+        - name: offset
+          in: query
+          description: Number of tasks to skip
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /todo/{id}:
+    get:
+      tags:
+        - Tasks
+      summary: Get a specific task
+      description: Retrieve a single task by its ID
+      operationId: getTask
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Task ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Task details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      tags:
+        - Tasks
+      summary: Update a task
+      description: Update an existing task
+      operationId: updateTask
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Task ID
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskRequest'
+      responses:
+        '200':
+          description: Task updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - Tasks
+      summary: Delete a task
+      description: Delete a task by its ID
+      operationId: deleteTask
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Task ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Task deleted successfully
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /todo/responsible/{userID}:
+    get:
+      tags:
+        - Tasks
+      summary: Get tasks by responsible user
+      description: Retrieve all tasks assigned to a specific user
+      operationId: getTasksByResponsible
+      parameters:
+        - name: userID
+          in: path
+          required: true
+          description: User ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: List of tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /todo/author/{userID}:
+    get:
+      tags:
+        - Tasks
+      summary: Get tasks by author
+      description: Retrieve all tasks created by a specific user
+      operationId: getTasksByAuthor
+      parameters:
+        - name: userID
+          in: path
+          required: true
+          description: User ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: List of tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /todo/overdue:
+    get:
+      tags:
+        - Tasks
+      summary: Get overdue tasks
+      description: Retrieve all tasks that are overdue and not completed
+      operationId: getOverdueTasks
+      responses:
+        '200':
+          description: List of overdue tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /statuses:
+    post:
+      tags:
+        - Task Status
+      summary: Create a new task status
+      description: Create a new task status
+      operationId: createTaskStatus
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskStatusRequest'
+      responses:
+        '201':
+          description: Task status created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskStatus'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    get:
+      tags:
+        - Task Status
+      summary: Get all task statuses
+      description: Retrieve a list of all task statuses
+      operationId: getAllTaskStatuses
+      responses:
+        '200':
+          description: List of task statuses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskStatus'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /statuses/{id}:
+    get:
+      tags:
+        - Task Status
+      summary: Get a specific task status
+      description: Retrieve a single task status by its ID
+      operationId: getTaskStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Task Status ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Task status details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskStatus'
+        '404':
+          description: Task status not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      tags:
+        - Task Status
+      summary: Update a task status
+      description: Update an existing task status
+      operationId: updateTaskStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Task Status ID
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskStatusRequest'
+      responses:
+        '200':
+          description: Task status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskStatus'
+        '404':
+          description: Task status not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - Task Status
+      summary: Delete a task status
+      description: Delete a task status by its ID
+      operationId: deleteTaskStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Task Status ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Task status deleted successfully
+        '404':
+          description: Task status not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /task-type:
+    post:
+      tags:
+        - Task Type
+      summary: Create a new task type
+      description: Create a new task type
+      operationId: createTaskType
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskTypeRequest'
+      responses:
+        '201':
+          description: Task type created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskType'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    get:
+      tags:
+        - Task Type
+      summary: Get all task types
+      description: Retrieve a list of all task types
+      operationId: getAllTaskTypes
+      responses:
+        '200':
+          description: List of task types
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskType'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /task-type/{id}:
+    get:
+      tags:
+        - Task Type
+      summary: Get a specific task type
+      description: Retrieve a single task type by its ID
+      operationId: getTaskType
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Task Type ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Task type details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskType'
+        '404':
+          description: Task type not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      tags:
+        - Task Type
+      summary: Update a task type
+      description: Update an existing task type
+      operationId: updateTaskType
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Task Type ID
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskTypeRequest'
+      responses:
+        '200':
+          description: Task type updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskType'
+        '404':
+          description: Task type not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - Task Type
+      summary: Delete a task type
+      description: Delete a task type by its ID
+      operationId: deleteTaskType
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Task Type ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Task type deleted successfully
+        '404':
+          description: Task type not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /workflows:
+    post:
+      tags:
+        - Workflows
+      summary: Create a new workflow
+      description: Create a new workflow with statuses
+      operationId: createWorkflow
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWorkflowRequest'
+      responses:
+        '201':
+          description: Workflow created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workflow'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    get:
+      tags:
+        - Workflows
+      summary: Get all workflows
+      description: Retrieve a list of all workflows
+      operationId: getAllWorkflows
+      responses:
+        '200':
+          description: List of workflows
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Workflow'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /workflows/{id}:
+    get:
+      tags:
+        - Workflows
+      summary: Get a specific workflow
+      description: Retrieve a single workflow by its ID
+      operationId: getWorkflow
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Workflow ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Workflow details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workflow'
+        '404':
+          description: Workflow not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      tags:
+        - Workflows
+      summary: Update a workflow
+      description: Update an existing workflow
+      operationId: updateWorkflow
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Workflow ID
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWorkflowRequest'
+      responses:
+        '200':
+          description: Workflow updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workflow'
+        '404':
+          description: Workflow not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - Workflows
+      summary: Delete a workflow
+      description: Delete a workflow by its ID
+      operationId: deleteWorkflow
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Workflow ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Workflow deleted successfully
+        '404':
+          description: Workflow not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Task:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        authorID:
+          type: integer
+          format: int64
+        responsibleID:
+          type: integer
+          format: int64
+        deadline:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        completed:
+          type: boolean
+        type:
+          $ref: '#/components/schemas/TaskType'
+        workflow:
+          $ref: '#/components/schemas/Workflow'
+        parent:
+          $ref: '#/components/schemas/Task'
+
+    CreateTaskRequest:
+      type: object
+      required:
+        - title
+        - description
+        - authorID
+        - deadline
+      properties:
+        title:
+          type: string
+          example: "Fix login bug"
+        description:
+          type: string
+          example: "There is an issue with the login form validation"
+        authorID:
+          type: integer
+          format: int64
+          example: 1
+        deadline:
+          type: string
+          format: date-time
+          example: "2026-02-28T15:30:00Z"
+
+    UpdateTaskRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        responsibleID:
+          type: integer
+          format: int64
+        deadline:
+          type: string
+          format: date-time
+        completed:
+          type: boolean
+
+    TaskStatus:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        label:
+          type: string
+        active:
+          type: boolean
+
+    CreateTaskStatusRequest:
+      type: object
+      required:
+        - label
+        - active
+      properties:
+        label:
+          type: string
+          example: "In Progress"
+        active:
+          type: boolean
+          example: true
+
+    UpdateTaskStatusRequest:
+      type: object
+      properties:
+        label:
+          type: string
+        active:
+          type: boolean
+
+    TaskType:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+
+    CreateTaskTypeRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          example: "Bug"
+
+    UpdateTaskTypeRequest:
+      type: object
+      properties:
+        name:
+          type: string
+
+    Workflow:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        statuses:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/TaskStatus'
+        author:
+          $ref: '#/components/schemas/User'
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateWorkflowRequest:
+      type: object
+      required:
+        - name
+        - statuses
+      properties:
+        name:
+          type: string
+          example: "Standard Workflow"
+        statuses:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/CreateTaskStatusRequest'
+
+    UpdateWorkflowRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        statuses:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/UpdateTaskStatusRequest'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "ERROR_DATABASE_CONNECTION"
+        message:
+          type: string
+          example: "Failed to connect to database"
