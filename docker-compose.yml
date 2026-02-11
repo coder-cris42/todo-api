@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   db:
@@ -9,6 +8,8 @@ services:
       MYSQL_DATABASE: todo-database
     volumes:
       - db_data:/var/lib/mysql
+      # Mount the SQL schema file for automatic execution on container startup
+      - ./scripts/sql/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
     ports:
       - "3306:3306"
     healthcheck:
@@ -45,3 +46,4 @@ volumes:
 networks:
   todo-network:
     driver: bridge
+

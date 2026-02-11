@@ -2,7 +2,6 @@ package entities
 
 import (
 	"fmt"
-	"time"
 )
 
 type Workflow struct {
@@ -10,7 +9,7 @@ type Workflow struct {
 	Name      string
 	Statuses  map[uint8]TaskStatus
 	Author    User
-	CreatedAt time.Time
+	CreatedAt DateTime
 }
 
 func NewWorkflow(name string, statuses map[uint8]TaskStatus, author User) Workflow {
@@ -18,7 +17,7 @@ func NewWorkflow(name string, statuses map[uint8]TaskStatus, author User) Workfl
 		Name:      name,
 		Statuses:  statuses,
 		Author:    author,
-		CreatedAt: time.Now(),
+		CreatedAt: Now(),
 	}
 }
 

@@ -9,9 +9,9 @@ type Task struct {
 	Status        TaskStatus
 	Parent        *Task
 	AuthorID      int64
-	Deadline      time.Time
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	Deadline      DateTime
+	CreatedAt     DateTime
+	UpdatedAt     DateTime
 	ResponsibleID int64
 	Workflow      Workflow
 	Type          TaskType
@@ -23,19 +23,19 @@ func NewTask(title string, description string, authorID int64, deadline time.Tim
 		Title:       title,
 		Description: description,
 		AuthorID:    authorID,
-		Deadline:    deadline,
+		Deadline:    NewDateTime(deadline),
 		Type:        taskType,
-		CreatedAt:   time.Now(),
+		CreatedAt:   Now(),
 	}
 }
 
 func (self *Task) IsOverdue() bool {
-	return !self.Completed && time.Now().After(self.Deadline)
+	return !self.Completed && time.Now().After(self.Deadline.Time)
 }
 
 func (self *Task) AssignTo(userID int64) {
 	self.ResponsibleID = userID
-	self.UpdatedAt = time.Now()
+	self.UpdatedAt = Now()
 }
 
 func (self *Task) ChangeStatus(newStatus TaskStatus) {
@@ -43,7 +43,7 @@ func (self *Task) ChangeStatus(newStatus TaskStatus) {
 	if self.isTheLastStatus() {
 		self.Completed = true
 	}
-	self.UpdatedAt = time.Now()
+	self.UpdatedAt = Now()
 }
 
 func (self *Task) IsCompleted() bool {
@@ -65,5 +65,5 @@ func (self *Task) isTheLastStatus() bool {
 
 func (self *Task) SetWorkflow(newWorkflow Workflow) {
 	self.Workflow = newWorkflow
-	self.UpdatedAt = time.Now()
+	self.UpdatedAt = Now()
 }

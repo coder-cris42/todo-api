@@ -48,7 +48,7 @@ func TestCreateTask_Success(t *testing.T) {
 
 	handler := handlers.NewTaskHandler(repo)
 
-	body := entities.Task{Title: "T1", Description: "D1", AuthorID: 1, Deadline: time.Now()}
+	body := entities.Task{Title: "T1", Description: "D1", AuthorID: 1, Deadline: entities.NewDateTime(time.Now())}
 	b, _ := json.Marshal(body)
 
 	w := httptest.NewRecorder()

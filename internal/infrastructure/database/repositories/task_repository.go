@@ -21,8 +21,13 @@ func (self *TaskRepository) Create(task entities.Task) (entities.Task, error) {
               created_at, updated_at, responsible_id, workflow_id, type_id, completed) 
               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
+	var parentID *int64
+	if task.Parent != nil {
+		parentID = &task.Parent.ID
+	}
+
 	result, err := self.db.Exec(query,
-		task.Title, task.Description, task.Status.ID, task.Parent.ID, task.AuthorID,
+		task.Title, task.Description, task.Status.ID, parentID, task.AuthorID,
 		task.Deadline, task.CreatedAt, task.UpdatedAt, task.ResponsibleID,
 		task.Workflow.ID, task.Type.ID, task.Completed,
 	)

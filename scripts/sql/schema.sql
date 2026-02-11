@@ -82,7 +82,6 @@ CREATE TABLE `workflows` (
     statuses JSON NOT NULL,
     author_id BIGINT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE,
     INDEX idx_author_id (author_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -119,13 +118,6 @@ CREATE TABLE `tasks` (
     workflow_id BIGINT NOT NULL,
     type_id BIGINT NOT NULL,
     completed BOOLEAN NOT NULL DEFAULT false,
-    
-    FOREIGN KEY (status_id) REFERENCES task_statuses(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    FOREIGN KEY (parent_id) REFERENCES tasks(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    FOREIGN KEY (responsible_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
-    FOREIGN KEY (workflow_id) REFERENCES workflows(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    FOREIGN KEY (type_id) REFERENCES task_types(id) ON DELETE RESTRICT ON UPDATE CASCADE,
     
     INDEX idx_status_id (status_id),
     INDEX idx_parent_id (parent_id),

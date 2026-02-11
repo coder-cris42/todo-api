@@ -1,0 +1,22 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch TODO API (cmd)",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/cmd",
+      "env": {
+        "DB_USERNAME": "root",
+        "DB_PASSWORD": "sandbox-root-password",
+        "DB_HOST": "127.0.0.1",
+        "DB_PORT": "3306",
+        "DB_NAME": "todo-database",
+        "SERVER_PORT": "8080",
+        "DB_TLS_SKIP_VERIFY": "true"
+      },
+      "args": []
+    }
+  ]
+}

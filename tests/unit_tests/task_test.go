@@ -18,12 +18,12 @@ func TestTask_IsOverdue(t *testing.T) {
 
 func TestTask_AssignToAndUpdatedAt(t *testing.T) {
 	task := todo.NewTask("t", "d", 1, time.Now().Add(24*time.Hour), todo.TaskType{ID: 1})
-	before := task.UpdatedAt
+	before := task.UpdatedAt.Time
 	task.AssignTo(42)
 	if task.ResponsibleID != 42 {
 		t.Fatalf("expected ResponsibleID 42 got %d", task.ResponsibleID)
 	}
-	if !task.UpdatedAt.After(before) {
+	if !task.UpdatedAt.Time.After(before) {
 		t.Fatalf("expected UpdatedAt to be updated")
 	}
 }
